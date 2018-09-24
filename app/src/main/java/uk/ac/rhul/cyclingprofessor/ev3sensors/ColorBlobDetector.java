@@ -9,26 +9,30 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 
-public class ColorBlobDetector {
+class ColorBlobDetector {
     // Lower and Upper bounds for range checking in HSV color space
-    private Scalar mLowerBound = new Scalar(0);
-    private Scalar mUpperBound = new Scalar(0);
+    private final Scalar mLowerBound = new Scalar(0);
+    private final Scalar mUpperBound = new Scalar(0);
     // Minimum contour area in percent for contours filtering
     private static double mMinContourArea = 0.1;
     // Color radius for range checking in HSV color space
     private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
-    private Mat mSpectrum = new Mat();
-    private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
+    private final Mat mSpectrum = new Mat();
+    private final List<MatOfPoint> mContours = new ArrayList<>();
+    private MatOfPoint maxContour;
+
 
     // Cache
-    Mat mPyrDownMat = new Mat();
-    Mat mHsvMat = new Mat();
-    Mat mMask = new Mat();
-    Mat mDilatedMask = new Mat();
-    Mat mHierarchy = new Mat();
+    private final Mat mPyrDownMat = new Mat();
+    private final Mat mHsvMat = new Mat();
+    private final Mat mMask = new Mat();
+    private final Mat mDilatedMask = new Mat();
+    private final Mat mHierarchy = new Mat();
 
     public void setColorRadius(Scalar radius) {
         mColorRadius = radius;
@@ -77,18 +81,21 @@ public class ColorBlobDetector {
         Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
         Imgproc.dilate(mMask, mDilatedMask, new Mat());
 
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        List<MatOfPoint> contours = new ArrayList<>();
 
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Find max contour area
+        maxContour = null;
         double maxArea = 0;
         Iterator<MatOfPoint> each = contours.iterator();
         while (each.hasNext()) {
             MatOfPoint wrapper = each.next();
             double area = Imgproc.contourArea(wrapper);
-            if (area > maxArea)
+            if (area > maxArea) {
                 maxArea = area;
+                maxContour = wrapper;
+            }
         }
 
         // Filter contours by area and resize to fit the original image size
@@ -105,5 +112,14 @@ public class ColorBlobDetector {
 
     public List<MatOfPoint> getContours() {
         return mContours;
+    }
+
+    public Point getCenterOfMaxContour() {
+        Point center = null;
+        if( maxContour != null ) {
+            Moments moments = Imgproc.moments(maxContour);
+            center = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
+        }
+        return center;
     }
 }

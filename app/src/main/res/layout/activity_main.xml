@@ -1,10 +1,61 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
 
-    <org.opencv.android.JavaCameraView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/color_blob_detection_activity_surface_view" />
+    <android.support.v7.widget.Toolbar
+        android:text="Help me Dave"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+    </android.support.v7.widget.Toolbar>
+<org.opencv.android.JavaCameraView
+    android:id="@+id/open_cv_activity_view"
+    android:layout_weight="3"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:paddingTop="40dp"
+    android:layout_marginLeft="2dp"
+    android:layout_marginTop="2dp"
+    android:layout_marginRight="2dp"/>
+
+<EditText
+    android:id="@+id/send"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dp"
+    android:background="#fff"
+    android:hint="Data for sending to EV3"
+    android:padding="5dp"
+    android:textColor="#000"
+    android:inputType="" />
+
+<Button
+    android:id="@+id/button_send"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:text="@string/send" />
+
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dp"
+    android:text="Data Received from EV3"
+    android:textColor="#f0f"
+    android:textSize="16sp" />
+
+<ListView
+    android:id="@+id/received"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_marginLeft="10dp"
+    android:layout_weight="2"
+    android:background="#fff"
+    android:hint="Data received from EV3"
+    android:padding="5dp"
+    android:textColor="#000" />
+
 </LinearLayout>
