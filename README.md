@@ -1,4 +1,4 @@
-#EV3Sensors
+# EV3Sensors
 ***
 
 This project extends the sensor and monitoring capabilities of an EV3 robot by adding an Android device.
@@ -21,7 +21,7 @@ It is expected that Android voice recognition or openCV face recognition could e
 
 ***
 
-#Usage.
+# Usage.
 
 You will need to set up the app by installing openCV manager 3.43
 Then install the apk.
@@ -36,7 +36,7 @@ Happy Hacking.
 
 ***
 
-#Requirements
+# Requirements
 
 Android Device.  EV3 robot (why not run Lejos or some other language making TCP/IP connections easy?)
 
