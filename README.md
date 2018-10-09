@@ -23,7 +23,7 @@ It is expected that Android voice recognition or openCV face recognition could e
 
 #Usage.
 
-You will need to set up the app by installing openCV manager 3.43
+You will need to set up the app by installing openCV manager 3.43. The download is available [here](https://sourceforge.net/projects/opencvlibrary/files/opencv-android/3.4.3/), you can then install the applicable apk provided.
 Then install the apk.
 
 You also need to connect to the robot over TCP/IP.  If the robot has a WiFi dongle then all well and good.  For Bluetooth you need to "reverse tether" your Android Bluetooth paired connection.  Simply pair the devices and then, when connected, use the setting icon in the Bluetooth screen to "allow internet" using this connection.
