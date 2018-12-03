@@ -82,7 +82,16 @@ class CV_Camera implements CvCameraViewListener2 {
             Imgproc.drawMarker(mRgba, center, MARKER_COLOR);
             double direction = (center.x - mRgba.cols() / 2) / mRgba.cols(); // portrait orientation
         }
-        return mRgba;
+        /*
+        Flip image
+        https://stackoverflow.com/a/40902455
+
+         */
+        Mat mRgbaT = mRgba.t();
+        Core.flip(mRgba.t(), mRgbaT, 1);
+        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
+
+        return mRgbaT;
     }
 
     private String zxing() throws ChecksumException, FormatException {
