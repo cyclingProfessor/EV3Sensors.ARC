@@ -341,7 +341,8 @@ class Server {
             r = connectionThread;
         }
         // Perform the write unsynchronized
-        r.write(out);
+        // Okay as writing to socket should be atomic.
+        new Thread(() -> r.write(out)).start();
     }
 
 
