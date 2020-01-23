@@ -29,9 +29,8 @@ class Server {
 
     private static final String TAG = "EV3Sensors::Server";
 
-    public Server(Activity activity, Handler handler) {
+    Server(Activity activity, Handler handler) {
         mHandler = handler;
-        Activity mActivity = activity;
         mState = STATE_NONE;
         mNewState = mState;
     }
@@ -214,7 +213,7 @@ class Server {
      * Get the EV3 name
      */
     private String getEV3name(Socket socket) {
-        final String name_code = "EV3_NAME(";
+        final String name_code = "Robot";
 
         // Send the name of the connected device back to the UI Activity
         Message msg = mHandler.obtainMessage(Constants.MESSAGE_DEVICE_NAME);
@@ -332,7 +331,7 @@ class Server {
      * @param out The bytes to write
      * @see ConnectionThread#write(byte[])
      */
-    public void write(byte[] out) {
+    void write(byte[] out) {
         // Create temporary object
         ConnectionThread r;
         // Synchronize a copy of the ConnectedThread

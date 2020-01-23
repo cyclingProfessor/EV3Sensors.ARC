@@ -21,9 +21,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     /**
      * Permissions that need to be explicitly requested from end user.
      */
-    private static final String[] REQUIRED_SDK_PERMISSIONS = new String[] {
-            Manifest.permission.CAMERA, Manifest.permission.INTERNET, Manifest.permission.NFC };
+    private static final String[] REQUIRED_SDK_PERMISSIONS = new String[]{
+            Manifest.permission.CAMERA, Manifest.permission.INTERNET, Manifest.permission.NFC};
 
     // Layout Views
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     public MainActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
-   }
+    }
 
     /**
      * Called when the activity is first created.
@@ -106,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
 
     }
-
 
 
     @Override
@@ -157,12 +157,20 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.show_addresses: {
+            case R.id.show_addresses:
                 // Launch the DeviceListActivity to see devices and do scan
                 Intent serverIntent = new Intent(this, ConnectionListActivity.class);
                 startActivityForResult(serverIntent, SHOWN_IPV4);
                 return true;
-            }
+            case R.id.about_app:
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle("EV3 Sensors App?").setMessage(getString(R.string.about_message)).show();
+                return true;
+            case R.id.exit_app:
+                mOpenCvCameraView.disableView();
+                finish();
+                moveTaskToBack(true);
+                return true;
             default: {
                 break;
             }
@@ -172,13 +180,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case SHOWN_IPV4:
-                if (resultCode != Activity.RESULT_OK) {
-                    // This modal dialog exits the application
-                    showExitDialog(getString(R.string.no_network_available));
-                }
-                break;
+        if ((requestCode== SHOWN_IPV4) && (resultCode != Activity.RESULT_OK)) {
+            showExitDialog(getString(R.string.no_network_available));
         }
     }
 
@@ -212,11 +215,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
         }
     };
+
     /**
      * Checks the dynamically-controlled permissions and requests missing permissions from end user.
-     *
+     * <p>
      * Modified from developer.here.com
-     *
      */
     private void checkPermissions() {
         final List<String> missingPermissions = new ArrayList<>();
@@ -230,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         if (!missingPermissions.isEmpty()) {
             // request required (and missing) permissions
             final String[] permissions = missingPermissions
-                    .toArray(new String[missingPermissions.size()]);
+                    .toArray(new String[0]);
             requestPermissions(permissions, PERMISSION_REQUEST_CODE);
         } else {
             // We already have them all - whoopee
@@ -241,20 +244,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
-                for (int index = permissions.length - 1; index >= 0; --index) {
-                    if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "Required permission '" + permissions[index]
-                                + "' not granted, exiting", Toast.LENGTH_LONG).show();
-                        finish();
-                        return;
-                    }
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            for (int index = permissions.length - 1; index >= 0; --index) {
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Required permission '" + permissions[index]
+                            + "' not granted, exiting", Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
                 }
-                initialize();
-                break;
+            }
+            initialize();
         }
     }
 
@@ -387,7 +388,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
      * Background task for reading the data. Do not block the UI thread while reading.
      *
      * @author Ralf Wondratschek
-     *
      */
     private static class NdefReaderTask extends AsyncTask<Tag, Void, String> {
         final WeakReference<MainActivity> mActivity;
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
      *
      * @param message A string of text to send.
      */
-     void sendMessage(String message) {
+    void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (server.getState() != Server.STATE_CONNECTED) {
             // Silently ignore messages.
@@ -477,7 +477,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             server.write(send);
         }
     }
-
 
 
 }

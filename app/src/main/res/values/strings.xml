@@ -6,4 +6,11 @@
     <string name="title_not_connected">No EV3 Connected</string>
     <string name="send">Send</string>
     <string name="app_name">EV3 Sensor Server</string>
+    <string name="about_message">This project extends the sensor and monitoring capabilities of an EV3 robot by adding an Android device.
+
+        The app always listens on port 1234 (hard coded). However it gets its IP address either from being on WiFi or from the EV3 Bluetooth AP. In either case the EV3 will need to know this address in order to connect as there is no service discovery coded.
+
+To this end we have a menu item - show IPv4 internet addresses - which will work to show you all of the available addresses. Now you need to find a way to enter such addresses into a running EV3 program - Your problem not mine.</string>
+    <string name="exit">Exit</string>
+    <string name="about">About</string>
 </resources>
