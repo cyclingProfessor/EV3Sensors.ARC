@@ -17,14 +17,15 @@ The only coding required on the robot is to open and manage a TCP/IP (text) conn
 
 4. Finally, for simple control, there is an EditText View in which you can type a message and press send.  This text also goes to the EV3.
 
-It is expected that Android voice recognition or openCV face recognition could easily be added to this app.
+It would be straightforward to add Android voice recognition or openCV face recognition or indeed any other Android sensor data to be sent to the robot.
 
 ***
 
 # Usage.
 
 You will need to set up the app by installing openCV manager 3.43. The download is available [here](https://sourceforge.net/projects/opencvlibrary/files/opencv-android/3.4.3/), you can then install the applicable apk provided.
-Then install the apk.
+
+I use the Droid Info app to find out the correct architecture for an apk on an Android device (it is free).
 
 You also need to connect to the robot over TCP/IP.  If the robot has a WiFi dongle then all well and good.  For Bluetooth you need to "reverse tether" your Android Bluetooth paired connection.  Simply pair the devices and then, when connected, use the setting icon in the Bluetooth screen to "allow internet" using this connection.
 
@@ -50,8 +51,12 @@ The architecture for this code merges the BlueToothChat Android example and the 
 
 ---
 
-Suggestion for Lejos and ev3dev use: Why not create an AndroidSensor class on the EV3, with an internal running Thread reading the Socket.  It is unusual in that you can send it a "connect" message, or indeed a "send" message to send text to Android.  It should "parse" text from the Android device and have several getters allowing you to monitor available (new) data of different types (QR, NFC, Face, Text, etc.,)
+To make this work on your LeJOS robot, create an AndroidSensor class on the EV3, with an internal running Thread reading the Socket.  
 
-I propose have an "String getQR()"" etc., and a "void markQRread" etc., then you can easily use the data from the Android device in the "takeControl" methods of your behaviours, since each take control method can get any pending QR code, check if it its relevant and only mark it read in its "action" method.
+It should "parse" text received from the Android device and have several getters allowing you to monitor available (new) data of different types (QR, NFC, Face, Text, etc.,)
 
-Of course you can miss QR codes if another is read before you have processed the previous one.  If this is likely then you will need to code some sort of buffer in the AndroidSensor class. 
+For example have a "String getQR()" and a "void markQRread".  Then you can easily use the data from the Android device in the "takeControl" methods of your behaviours, by calling getQR(). Check if the QR is relevant and only mark it read in the "action" method.
+
+Your LeJOS code can also send messages to the Android APP.  There is commented out code in the Android App expecting a "connect" message.  Any text sent to Android can be displayed, or acted on.
+
+Of course you can miss QR codes if another is seen before you have processed the previous one.
