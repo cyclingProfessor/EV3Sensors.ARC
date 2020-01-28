@@ -317,7 +317,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    String readMessage;
+                    try {
+                        readMessage = new String(readBuf, 0, msg.arg1);
+                    } catch (StringIndexOutOfBoundsException e) {
+                        Log.e(TAG, "could not read string, is the program running?", e);
+                        activity.setStatus("No EV3 Connected");
+                        System.exit(-1);
+                        break;
+                    }
+
                     activity.receivedItems.add(0, readMessage);
                     activity.listAdapter.notifyDataSetChanged();
                     break;
