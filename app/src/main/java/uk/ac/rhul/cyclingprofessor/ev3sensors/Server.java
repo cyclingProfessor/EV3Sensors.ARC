@@ -164,6 +164,9 @@ class Server {
                 } catch (IOException e) {
                     Log.e(TAG, "Server Socket accept() failed", e);
                     break;
+                } catch (NullPointerException e) {
+                    Log.e(TAG, "Nullpointer exception to stop crash ONLY first boot", e);
+                    break;
                 }
 
                 // If a connection was accepted
