@@ -14,7 +14,7 @@ import java.net.Socket;
 
 class Server {
     private final static int SERVER_PORT = 1234;
-    private Handler mHandler;
+    private final Handler mHandler;
 
     private int mState;
     private int mNewState;  // field so that we can track state in the debug log.

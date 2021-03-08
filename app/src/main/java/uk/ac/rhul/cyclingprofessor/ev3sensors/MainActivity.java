@@ -3,17 +3,8 @@ package uk.ac.rhul.cyclingprofessor.ev3sensors;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
-import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.nfc.tech.Ndef;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,7 +31,6 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String TAG = "EV3Sensors::Activity";
     private static final int SHOWN_IPV4 = 1;
     private static final int PERMISSION_REQUEST_CODE = 0;
-    private static final String MIME_TEXT_PLAIN = "text/plain";
 
     /**
      * Permissions that need to be explicitly requested from end user.
@@ -115,9 +104,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
         server.stop();
-        if (nfcAdpt != null) {
-            nfcAdpt.disableForegroundDispatch(this);
-        }
     }
 
     @Override
@@ -131,14 +117,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
         server.start();
-        if (nfcAdpt != null) {
-            nfcAdpt.enableForegroundDispatch(
-                    this,
-                    nfcPendingIntent,
-                    intentFiltersArray,
-                    null);
-        }
-
     }
 
     public void onDestroy() {
@@ -156,24 +134,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.show_addresses:
-                // Launch the DeviceListActivity to see devices and do scan
-                Intent serverIntent = new Intent(this, ConnectionListActivity.class);
-                startActivityForResult(serverIntent, SHOWN_IPV4);
-                return true;
-            case R.id.about_app:
-                AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("EV3 Sensors App?").setMessage(getString(R.string.about_message)).show();
-                return true;
-            case R.id.exit_app:
-                mOpenCvCameraView.disableView();
-                finish();
-                moveTaskToBack(true);
-                return true;
-            default: {
-                break;
-            }
+        int id = item.getItemId();
+        if (id == R.id.show_addresses) {
+            // Launch the DeviceListActivity to see devices and do scan
+            Intent serverIntent = new Intent(this, ConnectionListActivity.class);
+            startActivityForResult(serverIntent, SHOWN_IPV4);
+            return true;
+        } else if (id == R.id.about_app ) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("EV3 Sensors App?").setMessage(getString(R.string.about_message)).show();
+            return true;
+        } else if (id == R.id.exit_app) {
+            mOpenCvCameraView.disableView();
+            finish();
+            moveTaskToBack(true);
+            return true;
         }
         return false;
     }
@@ -202,16 +177,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                Log.i(TAG, "OpenCV loaded successfully");
+                mOpenCvCameraView.enableView();
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -263,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         mOpenCvCameraView.setCvCameraViewListener(new CV_Camera(this));
         server = new Server(this, mHandler);
         server.start();
-        startNFC();
     }
 
     /**
@@ -346,126 +315,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
      * The Handler that gets information back from the Server object
      */
     private final ServerHandler mHandler = new ServerHandler(this);
-
-    private NfcAdapter nfcAdpt;
-    private PendingIntent nfcPendingIntent;
-    private IntentFilter[] intentFiltersArray;
-
-    private void startNFC() {
-        nfcAdpt = NfcAdapter.getDefaultAdapter(this);
-        // Check if the smartphone has NFC - even if it does not we should just continue - but we will receive no intents.
-        if (nfcAdpt == null) {
-            return;
-        }
-        // Check if NFC is enabled
-        if (!nfcAdpt.isEnabled()) {
-            Toast.makeText(this, "Enable NFC before using the app", Toast.LENGTH_LONG).show();
-            return;
-        }
-        Context context = getApplicationContext();
-
-        Intent nfcIntent = new Intent(context, MainActivity.class);
-        nfcIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        nfcPendingIntent = PendingIntent.getActivity(context, 0, nfcIntent, 0);
-
-        IntentFilter tagIntentFilter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        try {
-            tagIntentFilter.addDataType(MIME_TEXT_PLAIN);
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            e.printStackTrace();
-        }
-        intentFiltersArray = new IntentFilter[]{tagIntentFilter};
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.d(TAG, "Found a Tag");
-
-        String action = intent.getAction();
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            String type = intent.getType();
-            if (MIME_TEXT_PLAIN.equals(type)) {
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new NdefReaderTask(this).execute(tag);
-            }
-        }
-    }
-
-    /**
-     * Background task for reading the data. Do not block the UI thread while reading.
-     *
-     * @author Ralf Wondratschek
-     */
-    private static class NdefReaderTask extends AsyncTask<Tag, Void, String> {
-        final WeakReference<MainActivity> mActivity;
-
-        NdefReaderTask(MainActivity activity) {
-            mActivity = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected String doInBackground(Tag... params) {
-            Tag tag = params[0];
-
-            Ndef ndef = Ndef.get(tag);
-            if (ndef == null) {
-                // NDEF is not supported by this Tag.
-                return null;
-            }
-
-            NdefMessage ndefMessage = ndef.getCachedNdefMessage();
-            NdefRecord[] records = ndefMessage.getRecords();
-            for (NdefRecord ndefRecord : records) {
-                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
-                    try {
-                        Log.d(MainActivity.TAG, "NFC Processing");
-                        return readText(ndefRecord);
-                    } catch (UnsupportedEncodingException e) {
-                        Log.e(MainActivity.TAG, "Unsupported Encoding", e);
-                    }
-                }
-            }
-            return null;
-        }
-
-        private String readText(NdefRecord record) throws UnsupportedEncodingException {
-            /*
-             * See NFC forum specification for "Text Record Type Definition" at 3.2.1
-             *
-             * http://www.nfc-forum.org/specs/
-             *
-             * bit_7 defines encoding
-             * bit_6 reserved for future use, must be 0
-             * bit_5..0 length of IANA language code
-             */
-
-            byte[] payload = record.getPayload();
-
-            // Get the Text Encoding
-            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
-
-            // Get the Language Code
-            int languageCodeLength = payload[0] & 63;
-
-            // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-            // e.g. "en"
-
-            // Get the Text
-            return new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                MainActivity activity = mActivity.get();
-                if (activity != null) {
-                    activity.sendMessage("NFC: " + result);
-                }
-            }
-        }
-    }
 
     /**
      * Sends a message.

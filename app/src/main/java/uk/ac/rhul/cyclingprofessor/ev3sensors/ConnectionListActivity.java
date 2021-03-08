@@ -15,6 +15,7 @@ public class ConnectionListActivity extends Activity {
     /**
      * Tag for Log
      */
+    @SuppressWarnings("unused")
     private static final String TAG = "ConnectionListActivity";
 
     @Override
