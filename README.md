@@ -13,7 +13,7 @@ The only coding required on the robot is to open and manage a TCP/IP (text) conn
 
    At present this is done in the Camera module after any (novel) QR code is seen.  This openCV module also finds all BLUE blobs and the centre of the largest, but does nothing with this information - it could send something (say a recognised face) to the EV3.
 
-3. The Android app also registers an Intent to receive notifications of NFC tags.  It extracts the text from such tags and sends this to the EV3.
+3. The original version (2.0) of the Android app also registers an Intent to receive notifications of NFC tags.  It extracts the text from such tags and sends this to the EV3.  Version 2.1 does not do this.
 
 4. Finally, for simple control, there is an EditText View in which you can type a message and press send.  This text also goes to the EV3.
 

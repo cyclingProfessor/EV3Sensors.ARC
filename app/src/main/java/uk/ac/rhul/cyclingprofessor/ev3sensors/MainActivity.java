@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
      * Permissions that need to be explicitly requested from end user.
      */
     private static final String[] REQUIRED_SDK_PERMISSIONS = new String[]{
-            Manifest.permission.CAMERA, Manifest.permission.INTERNET, Manifest.permission.NFC};
+            Manifest.permission.CAMERA};
 
     // Layout Views
     private CameraBridgeViewBase mOpenCvCameraView;
